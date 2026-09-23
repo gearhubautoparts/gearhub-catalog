@@ -1,0 +1,8 @@
+{
+  "name": "gearhub-public-catalog",
+  "private": true,
+  "type": "module",
+  "scripts": { "sync": "node sync.js", "test": "node --test" },
+  "dependencies": { "fast-xml-parser": "5.11.1" },
+  "engines": { "node": ">=24" }
+}
