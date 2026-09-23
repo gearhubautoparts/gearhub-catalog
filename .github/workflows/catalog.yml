@@ -29,7 +29,7 @@ jobs:
         run: |
           git config user.name 'GearHub catalog bot'
           git config user.email 'catalog@users.noreply.github.com'
-          git add data/catalog.json data/sync-state.json data/compatibility
+          git add data/catalog.json data/sync-state.json data/compatibility data/reputation.json
           if ! git diff --cached --quiet; then
             git commit -m 'Update public eBay catalog'
             git push origin HEAD:main

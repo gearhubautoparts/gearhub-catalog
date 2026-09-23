@@ -2,6 +2,7 @@ import { readFileSync, existsSync, writeFileSync, renameSync } from 'node:fs';
 import { createEbayReader } from './lib/ebay-reader.js';
 import { synchronize } from './lib/sync.js';
 import { writeCatalogFiles } from './lib/catalog-files.js';
+import { refreshReputation } from './lib/reputation.js';
 
 try {
   const credentials = {
@@ -12,9 +13,12 @@ try {
   if (!Object.values(credentials).every(Boolean)) throw new Error('Missing GitHub Secrets');
   const previous = JSON.parse(readFileSync('data/catalog.json', 'utf8'));
   const state = existsSync('data/sync-state.json') ? JSON.parse(readFileSync('data/sync-state.json', 'utf8')) : {};
-  const result = await synchronize(createEbayReader({ credentials: () => credentials }), previous, state);
+  const reader = createEbayReader({ credentials: () => credentials });
+  const result = await synchronize(reader, previous, state);
+  const previousReputation = existsSync('data/reputation.json') ? JSON.parse(readFileSync('data/reputation.json', 'utf8')) : {};
+  const reputation = await refreshReputation(reader, previousReputation);
   writeCatalogFiles('data', result.catalog);
-  for (const [path, value] of [['data/sync-state.json', result.state]]) {
+  for (const [path, value] of [['data/sync-state.json', result.state], ['data/reputation.json', reputation]]) {
     writeFileSync(`${path}.tmp`, JSON.stringify(value));
     renameSync(`${path}.tmp`, path);
   }
