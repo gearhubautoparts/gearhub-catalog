@@ -1,6 +1,7 @@
 import { readFileSync, existsSync, writeFileSync, renameSync } from 'node:fs';
 import { createEbayReader } from './lib/ebay-reader.js';
 import { synchronize } from './lib/sync.js';
+import { writeCatalogFiles } from './lib/catalog-files.js';
 
 try {
   const credentials = {
@@ -12,7 +13,8 @@ try {
   const previous = JSON.parse(readFileSync('data/catalog.json', 'utf8'));
   const state = existsSync('data/sync-state.json') ? JSON.parse(readFileSync('data/sync-state.json', 'utf8')) : {};
   const result = await synchronize(createEbayReader({ credentials: () => credentials }), previous, state);
-  for (const [path, value] of [['data/catalog.json', result.catalog], ['data/sync-state.json', result.state]]) {
+  writeCatalogFiles('data', result.catalog);
+  for (const [path, value] of [['data/sync-state.json', result.state]]) {
     writeFileSync(`${path}.tmp`, JSON.stringify(value));
     renameSync(`${path}.tmp`, path);
   }
